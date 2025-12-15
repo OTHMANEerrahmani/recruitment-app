@@ -1,0 +1,17 @@
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/AdminServlet.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/AuthServlet.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/CandidateServlet.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/CompanyServlet.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/dao/AbstractDAO.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/dao/ApplicationDAO.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/dao/GenericDAO.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/dao/JobOfferDAO.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/dao/UserDAO.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/entity/Application.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/entity/Candidate.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/entity/Company.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/entity/JobOffer.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/entity/User.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/service/AuthService.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/service/JobService.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/util/JPAUtil.java
