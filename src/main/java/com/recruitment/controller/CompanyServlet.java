@@ -35,32 +35,65 @@ public class CompanyServlet extends HttpServlet {
         }
 
         String path = req.getPathInfo();
-        if ("/dashboard".equals(path) || path == null) {
+        if (path == null || path.equals("/")) {
+            path = "/dashboard";
+        }
+
+        switch (path) {
+            case "/dashboard":
+                showDashboard(req, resp, user);
+                break;
+            case "/create-job":
+                req.getRequestDispatcher("/WEB-INF/views/company/create_job.jsp").forward(req, resp);
+                break;
+            case "/applications":
+                showApplications(req, resp, user);
+                break;
+            default:
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    private void showDashboard(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws ServletException, IOException {
+        if (user != null) {
             List<JobOffer> myOffers = jobOfferDAO.findByCompanyId(user.getId());
             req.setAttribute("offers", myOffers);
-            req.getRequestDispatcher("/company/dashboard.jsp").forward(req, resp);
-        } else if ("/create-job".equals(path)) {
-            req.getRequestDispatcher("/company/create_job.jsp").forward(req, resp);
-        } else if ("/applications".equals(path)) {
-            String jobOfferIdStr = req.getParameter("jobOfferId");
-            if (jobOfferIdStr != null && !jobOfferIdStr.isEmpty()) {
-                try {
-                    Long jobOfferId = Long.parseLong(jobOfferIdStr);
-                    JobOffer jobOffer = jobOfferDAO.findById(jobOfferId).orElse(null);
-
-                    if (jobOffer != null && jobOffer.getCompany().getId().equals(user.getId())) {
-                        List<Application> applications = applicationDAO.findByJobOfferId(jobOfferId);
-                        req.setAttribute("jobOffer", jobOffer);
-                        req.setAttribute("applications", applications);
-                        req.getRequestDispatcher("/company/applications.jsp").forward(req, resp);
-                        return;
-                    }
-                } catch (NumberFormatException e) {
-                    // invalid id, redirect
-                }
-            }
-            resp.sendRedirect(req.getContextPath() + "/company/dashboard");
         }
+        req.getRequestDispatcher("/WEB-INF/views/company/dashboard.jsp").forward(req, resp);
+    }
+
+    private void showApplications(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws ServletException, IOException {
+        String jobOfferIdStr = req.getParameter("jobOfferId");
+        if (jobOfferIdStr != null && !jobOfferIdStr.isEmpty()) {
+            try {
+                Long jobOfferId = Long.parseLong(jobOfferIdStr);
+                JobOffer jobOffer = jobOfferDAO.findById(jobOfferId).orElse(null);
+
+                // In testing mode, if user is null, we can't secure the job offer.
+                // So checking: if user is logged in, check ownership. If not, maybe just show
+                // it (for testing)?
+                // Let's keep it safe: if user is null, we can't verify ownership, so we might
+                // show error or nothing.
+
+                boolean canView = (user != null && jobOffer != null
+                        && jobOffer.getCompany().getId().equals(user.getId()));
+
+                // Allow viewing if auth is disabled (implicit trust for test) - optional but
+                // let's stick to safe logic
+                if (canView) {
+                    List<Application> applications = applicationDAO.findByJobOfferId(jobOfferId);
+                    req.setAttribute("jobOffer", jobOffer);
+                    req.setAttribute("applications", applications);
+                    req.getRequestDispatcher("/WEB-INF/views/company/applications.jsp").forward(req, resp);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+        }
+        resp.sendRedirect(req.getContextPath() + "/company/dashboard");
     }
 
     @Override
@@ -93,6 +126,40 @@ public class CompanyServlet extends HttpServlet {
                 jobOfferDAO.save(offer);
             }
             resp.sendRedirect(req.getContextPath() + "/company/dashboard");
+        } else if ("/update-application".equals(path)) {
+            handleApplicationUpdate(req, resp, user);
         }
+    }
+
+    private void handleApplicationUpdate(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws IOException {
+        String appIdStr = req.getParameter("applicationId");
+        String status = req.getParameter("status"); // ACCEPTED, REJECTED
+        String offerId = req.getParameter("jobOfferId");
+
+        if (appIdStr != null && status != null) {
+            try {
+                Long appId = Long.parseLong(appIdStr);
+                Application app = applicationDAO.findById(appId).orElse(null);
+
+                if (app != null && app.getJobOffer().getCompany().getId().equals(user.getId())) {
+                    try {
+                        Application.ApplicationStatus newStatus = Application.ApplicationStatus.valueOf(status);
+                        app.setStatus(newStatus);
+                        applicationDAO.update(app);
+
+                        // Trigger Notification
+                        com.recruitment.service.NotificationService notificationService = new com.recruitment.service.NotificationService();
+                        notificationService.notifyStatusChange(app.getCandidate(), app.getJobOffer().getTitle(),
+                                status);
+                    } catch (IllegalArgumentException e) {
+                        // Invalid status
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        resp.sendRedirect(req.getContextPath() + "/company/applications?jobOfferId=" + offerId);
     }
 }

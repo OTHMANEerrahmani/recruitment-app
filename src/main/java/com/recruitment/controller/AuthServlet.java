@@ -53,17 +53,23 @@ public class AuthServlet extends HttpServlet {
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+            System.out.println("DEBUG: Login successful for " + email + " Role: " + user.getRole());
             HttpSession session = req.getSession();
             session.setAttribute("user", user);
 
+            String redirectPath;
             if (user.getRole() == User.Role.ADMIN) {
-                resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
+                redirectPath = "/admin/dashboard";
             } else if (user.getRole() == User.Role.COMPANY) {
-                resp.sendRedirect(req.getContextPath() + "/company/dashboard");
+                redirectPath = "/company/dashboard";
             } else {
-                resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
+                redirectPath = "/candidate/dashboard";
             }
+
+            System.out.println("DEBUG: Redirecting to " + req.getContextPath() + redirectPath);
+            resp.sendRedirect(req.getContextPath() + redirectPath);
         } else {
+            System.out.println("DEBUG: Login failed for " + email);
             req.setAttribute("error", "Invalid credentials");
             req.getRequestDispatcher("/login.jsp").forward(req, resp);
         }

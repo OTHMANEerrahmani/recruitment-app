@@ -9,8 +9,20 @@ import java.util.Optional;
 public class AuthService {
 
     private UserDAO userDAO = new UserDAO();
+    private EmailService emailService = new EmailService();
 
     public Optional<User> login(String email, String password) {
+        // --- HARDCODED ADMIN FALLBACK (Requested by User) ---
+        if ("admin@recruitment.com".equals(email) && "admin123".equals(password)) {
+            com.recruitment.entity.Admin admin = new com.recruitment.entity.Admin();
+            admin.setId(0L); // Dummy ID
+            admin.setEmail(email);
+            admin.setPassword(password);
+            admin.setRole(User.Role.ADMIN);
+            admin.setActive(true);
+            return Optional.of(admin);
+        }
+
         Optional<User> userOpt = userDAO.findByEmail(email);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
@@ -27,11 +39,14 @@ public class AuthService {
         }
         Candidate candidate = new Candidate();
         candidate.setEmail(email);
-        candidate.setPassword(password); // Should hash
-        candidate.setRole(User.Role.CANDIDATE);
+        candidate.setPassword(password); // In real app, hash this!
         candidate.setFirstName(firstName);
         candidate.setLastName(lastName);
+        candidate.setRole(User.Role.CANDIDATE);
         userDAO.save(candidate);
+
+        emailService.sendEmail(email, "Welcome to RecruttAnty!",
+                "Hi " + firstName + ",\n\nWelcome to RecruttAnty! Complete your profile to start applying.");
         return true;
     }
 
@@ -41,11 +56,14 @@ public class AuthService {
         }
         Company company = new Company();
         company.setEmail(email);
-        company.setPassword(password); // Should hash
-        company.setRole(User.Role.COMPANY);
+        company.setPassword(password); // Hash this!
         company.setCompanyName(companyName);
         company.setAddress(address);
+        company.setRole(User.Role.COMPANY);
         userDAO.save(company);
+
+        emailService.sendEmail(email, "Welcome to RecruttAnty!",
+                "Hello " + companyName + ",\n\nWelcome to RecruttAnty! You can now post job offers.");
         return true;
     }
 }

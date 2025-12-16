@@ -27,33 +27,73 @@ public class CandidateServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("DEBUG: CandidateServlet doGet entered");
         HttpSession session = req.getSession();
         User user = (User) session.getAttribute("user");
 
         if (user == null || user.getRole() != User.Role.CANDIDATE) {
+            System.out.println("DEBUG: User not authenticated or wrong role. Redirecting to login.");
             resp.sendRedirect(req.getContextPath() + "/auth/login");
             return;
         }
 
         String path = req.getPathInfo();
-        if ("/dashboard".equals(path) || path == null) {
-            List<JobOffer> offers = jobService.getAllOffers();
-            Candidate candidate = (Candidate) userDAO.findById(user.getId()).orElse(null);
+        System.out.println("DEBUG: PathInfo is: " + path);
 
-            // Re-fetch candidate to ensure we have latest skills
-            if (candidate != null) {
-                // Attach match score
-                // Ideally create a DTO, but for JSP we can use a map or just pass the service
-                req.setAttribute("jobService", jobService);
-                req.setAttribute("candidate", candidate);
-            }
-            req.setAttribute("offers", offers);
-            req.getRequestDispatcher("/candidate/dashboard.jsp").forward(req, resp);
-        } else if ("/profile".equals(path)) {
+        // Default to dashboard if path is null or /
+        if (path == null || path.equals("/")) {
+            path = "/dashboard";
+        }
+
+        switch (path) {
+            case "/dashboard":
+                System.out.println("DEBUG: Handling /dashboard");
+                showDashboard(req, resp, user);
+                break;
+            case "/profile":
+                System.out.println("DEBUG: Handling /profile");
+                showProfile(req, resp, user);
+                break;
+            default:
+                System.out.println("DEBUG: Path not found: " + path);
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                break;
+        }
+    }
+
+    private void showDashboard(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws ServletException, IOException {
+        System.out.println("DEBUG: showDashboard executing");
+        List<JobOffer> offers = jobService.getAllOffers();
+        System.out.println("DEBUG: Found " + (offers != null ? offers.size() : "null") + " offers");
+
+        if (user != null) {
             Candidate candidate = (Candidate) userDAO.findById(user.getId()).orElse(null);
             req.setAttribute("candidate", candidate);
-            req.getRequestDispatcher("/candidate/profile.jsp").forward(req, resp);
+
+            // Fetch notifications
+            com.recruitment.service.NotificationService notificationService = new com.recruitment.service.NotificationService();
+            List<com.recruitment.entity.Notification> notifications = notificationService.getUserNotifications(user);
+            req.setAttribute("notifications", notifications);
+
+            // Fetch my applications
+            List<Application> myApplications = applicationDAO.findByCandidateId(candidate.getId());
+            req.setAttribute("myApplications", myApplications);
         }
+
+        req.setAttribute("jobService", jobService);
+        req.setAttribute("offers", offers);
+        System.out.println("DEBUG: Forwarding to /WEB-INF/views/candidate/dashboard.jsp");
+        req.getRequestDispatcher("/WEB-INF/views/candidate/dashboard.jsp").forward(req, resp);
+    }
+
+    private void showProfile(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws ServletException, IOException {
+        if (user != null) {
+            Candidate candidate = (Candidate) userDAO.findById(user.getId()).orElse(null);
+            req.setAttribute("candidate", candidate);
+        }
+        req.getRequestDispatcher("/WEB-INF/views/candidate/profile.jsp").forward(req, resp);
     }
 
     @Override
@@ -68,38 +108,69 @@ public class CandidateServlet extends HttpServlet {
 
         String path = req.getPathInfo();
         if ("/profile".equals(path)) {
-            String firstName = req.getParameter("firstName");
-            String lastName = req.getParameter("lastName");
-            String skills = req.getParameter("skills");
-            String resumeUrl = req.getParameter("resumeUrl");
-
-            Candidate candidate = (Candidate) userDAO.findById(user.getId()).orElse(null);
-            if (candidate != null) {
-                candidate.setFirstName(firstName);
-                candidate.setLastName(lastName);
-                candidate.setSkills(skills);
-                candidate.setResumeUrl(resumeUrl);
-                userDAO.update(candidate);
-
-                // Update session user to reflect changes if necessary or just reload from DB
-                // next time
-                session.setAttribute("user", candidate);
-            }
-            resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
+            handleProfileUpdate(req, resp, session, user);
         } else if ("/apply".equals(path)) {
-            String jobIdStr = req.getParameter("jobId");
-            Long jobId = Long.parseLong(jobIdStr);
+            handleJobApplication(req, resp, user);
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
+        }
+    }
 
+    private void handleProfileUpdate(HttpServletRequest req, HttpServletResponse resp, HttpSession session, User user)
+            throws IOException {
+        if (user == null) {
+            resp.sendRedirect(req.getContextPath() + "/auth/login");
+            return;
+        }
+
+        String firstName = req.getParameter("firstName");
+        String lastName = req.getParameter("lastName");
+        String skills = req.getParameter("skills");
+        String resumeUrl = req.getParameter("resumeUrl");
+
+        Candidate candidate = (Candidate) userDAO.findById(user.getId()).orElse(null);
+        if (candidate != null) {
+            candidate.setFirstName(firstName);
+            candidate.setLastName(lastName);
+            candidate.setSkills(skills);
+            candidate.setResumeUrl(resumeUrl);
+            userDAO.update(candidate);
+            session.setAttribute("user", candidate);
+        }
+        resp.sendRedirect(req.getContextPath() + "/candidate/dashboard");
+    }
+
+    private void handleJobApplication(HttpServletRequest req, HttpServletResponse resp, User user) throws IOException {
+        if (user == null) {
+            resp.sendRedirect(req.getContextPath() + "/auth/login");
+            return;
+        }
+
+        String jobIdStr = req.getParameter("jobId");
+        try {
+            Long jobId = Long.parseLong(jobIdStr);
             JobOffer jobOffer = jobOfferDAO.findById(jobId).orElse(null);
             Candidate candidate = (Candidate) userDAO.findById(user.getId()).orElse(null);
 
             if (jobOffer != null && candidate != null) {
+                // Check if already applied
+                if (applicationDAO.hasApplied(candidate.getId(), jobOffer.getId())) {
+                    resp.sendRedirect(req.getContextPath() + "/candidate/dashboard?error=already_applied");
+                    return;
+                }
+
                 Application application = new Application();
                 application.setCandidate(candidate);
                 application.setJobOffer(jobOffer);
                 applicationDAO.save(application);
+
+                // Trigger Notifications
+                com.recruitment.service.NotificationService notificationService = new com.recruitment.service.NotificationService();
+                notificationService.notifyApplication(jobOffer.getCompany(), candidate, jobOffer.getTitle());
             }
-            resp.sendRedirect(req.getContextPath() + "/candidate/dashboard?success=applied");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        resp.sendRedirect(req.getContextPath() + "/candidate/dashboard?success=applied");
     }
 }

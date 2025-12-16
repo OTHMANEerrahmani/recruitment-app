@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class User {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,11 +21,22 @@ public abstract class User {
     @Column(nullable = false)
     protected Role role;
 
+    @Column(nullable = false)
+    protected boolean isActive = true;
+
     public enum Role {
         CANDIDATE, COMPANY, ADMIN
     }
 
     public User() {
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public Long getId() {
