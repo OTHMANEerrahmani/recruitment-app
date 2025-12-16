@@ -36,8 +36,13 @@ public class UserService {
             if (user != null) {
                 // 3. Handle Role-Specific Dependencies
                 if (user instanceof com.recruitment.entity.Candidate) {
-                    // Delete applications by this candidate
+                    // 1. Delete applications by this candidate
                     em.createQuery("DELETE FROM Application a WHERE a.candidate.id = :id")
+                            .setParameter("id", id)
+                            .executeUpdate();
+
+                    // 2. Delete messages sent by/to this candidate
+                    em.createQuery("DELETE FROM Message m WHERE m.candidate.id = :id")
                             .setParameter("id", id)
                             .executeUpdate();
 
@@ -78,7 +83,9 @@ public class UserService {
             }
 
             em.getTransaction().commit();
-        } catch (Exception e) {
+        } catch (
+
+        Exception e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }

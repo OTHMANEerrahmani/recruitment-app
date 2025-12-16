@@ -53,7 +53,18 @@ public class AuthServlet extends HttpServlet {
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            System.out.println("DEBUG: Login successful for " + email + " Role: " + user.getRole());
+            System.out.println("DEBUG: Login successful for " + email + " Role: " + user.getRole() + " Status: "
+                    + user.getStatus());
+
+            if (user.getStatus() != User.Status.ACTIVE) {
+                System.out.println("DEBUG: User not active. Redirecting to pending approval.");
+                // Do not create a persistent session for unapproved users, or maybe just
+                // temporary?
+                // For now, no session attribute "user", so they are effectively not logged in.
+                resp.sendRedirect(req.getContextPath() + "/pending_approval.jsp");
+                return;
+            }
+
             HttpSession session = req.getSession();
             session.setAttribute("user", user);
 

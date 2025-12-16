@@ -19,6 +19,7 @@ public class AuthService {
             admin.setEmail(email);
             admin.setPassword(password);
             admin.setRole(User.Role.ADMIN);
+            admin.setStatus(User.Status.ACTIVE);
             admin.setActive(true);
             return Optional.of(admin);
         }
@@ -43,6 +44,8 @@ public class AuthService {
         candidate.setFirstName(firstName);
         candidate.setLastName(lastName);
         candidate.setRole(User.Role.CANDIDATE);
+        candidate.setStatus(User.Status.PENDING);
+        candidate.setActive(false); // Default logic
         userDAO.save(candidate);
 
         emailService.sendEmail(email, "Welcome to RecruttAnty!",
@@ -60,6 +63,8 @@ public class AuthService {
         company.setCompanyName(companyName);
         company.setAddress(address);
         company.setRole(User.Role.COMPANY);
+        company.setStatus(User.Status.PENDING);
+        company.setActive(false); // Default logic
         userDAO.save(company);
 
         emailService.sendEmail(email, "Welcome to RecruttAnty!",

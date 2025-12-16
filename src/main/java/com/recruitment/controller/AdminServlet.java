@@ -129,21 +129,29 @@ public class AdminServlet extends HttpServlet {
                         }
                     }
 
-                    if ("activate".equals(action)) {
+                    if ("activate".equals(action) || "approve".equals(action)) {
+                        userToUpdate.setStatus(User.Status.ACTIVE);
                         userToUpdate.setActive(true);
-                    } else if ("deactivate".equals(action)) {
+                    } else if ("deactivate".equals(action) || "reject".equals(action)) {
+                        userToUpdate.setStatus(User.Status.REJECTED);
                         userToUpdate.setActive(false);
                     }
 
                     userService.updateUser(userToUpdate);
 
                     // Trigger Notification
-                    if ("activate".equals(action) || "deactivate".equals(action)) {
+                    if ("approve".equals(action) || "activate".equals(action)) {
                         com.recruitment.service.NotificationService notificationService = new com.recruitment.service.NotificationService();
-                        String statusMsg = userToUpdate.isActive() ? "activated" : "deactivated";
                         notificationService.createNotification(userToUpdate,
-                                "Your account has been " + statusMsg + " by the administrator.",
+                                "Your account has been approved and activated. You can now access your dashboard.",
                                 com.recruitment.entity.Notification.NotificationType.SYSTEM);
+                    } else if ("reject".equals(action) || "deactivate".equals(action)) {
+                        // Optional: Notify rejection? Maybe simple "Your account has been
+                        // deactivated/rejected"
+                        // If we rejected a pending user, they can't login to see it unless we email
+                        // them.
+                        // But if they are deactivated, they might have seen it.
+                        // Let's strictly follow requirement: "Admin approval changes status to ACTIVE".
                     }
                 }
             } catch (NumberFormatException e) {

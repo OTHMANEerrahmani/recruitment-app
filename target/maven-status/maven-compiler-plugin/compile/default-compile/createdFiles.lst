@@ -30,6 +30,8 @@ com/recruitment/entity/Notification$NotificationType.class
 com/recruitment/dao/JobOfferDAO.class
 com/recruitment/controller/AdminCandidateProfileServlet.class
 com/recruitment/service/AuthService.class
+com/recruitment/controller/CompanyCandidateProfileServlet.class
 com/recruitment/dao/ApplicationDAO.class
 com/recruitment/controller/AdminDeleteJobOfferServlet.class
 com/recruitment/service/UserService.class
+com/recruitment/entity/User$Status.class

@@ -4,6 +4,7 @@
 /Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/AdminServlet.java
 /Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/AuthServlet.java
 /Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/CandidateServlet.java
+/Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/CompanyCandidateProfileServlet.java
 /Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/CompanyServlet.java
 /Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/MessageServlet.java
 /Users/MAC/recruttAnty/src/main/java/com/recruitment/controller/NotificationServlet.java

@@ -30,59 +30,74 @@
                     </nav>
                 </header>
 
-                <main class="container" style="padding: 3rem 2rem;">
-                    <div class="dashboard-header">
-                        <h2>Your Job Listings</h2>
+                <main class="container" style="padding: 3rem 0; max-width: 1200px;">
+                    <div class="dashboard-header"
+                        style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
+                        <div>
+                            <h2 style="font-size: 1.75rem; color: #0f172a; margin-bottom: 0.5rem;">Job Listings</h2>
+                            <p style="color: #64748b;">Manage your open positions and track candidates.</p>
+                        </div>
+                        <a href="${pageContext.request.contextPath}/company/create-job" class="btn-recruit-primary">
+                            <span style="font-size: 1.2rem;">+</span> Post New Job
+                        </a>
                     </div>
 
-                    <div class="jobs-grid">
+                    <div class="recruiter-grid">
                         <% List<JobOffer> offers = (List<JobOffer>) request.getAttribute("offers");
                                 if (offers != null && !offers.isEmpty()) {
                                 for (JobOffer offer : offers) {
                                 %>
-                                <div class="job-card">
-                                    <div
-                                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                                        <h3 class="job-title" style="margin-bottom: 0;">
-                                            <%= offer.getTitle() %>
-                                        </h3>
-                                        <div class="company-logo-small">J</div>
+                                <div class="recruiter-job-card">
+                                    <div class="recruiter-card-header">
+                                        <div>
+                                            <h3 class="recruiter-job-title">
+                                                <%= offer.getTitle() %>
+                                            </h3>
+                                            <div style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">Posted
+                                                recently</div>
+                                        </div>
+                                        <div
+                                            style="width: 40px; height: 40px; background: #e0f2fe; color: #0284c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                                            J
+                                        </div>
                                     </div>
 
-                                    <div class="job-meta">
+                                    <div class="recruiter-job-meta">
                                         <% if (offer.getSalary() !=null) { %>
-                                            <span class="job-salary">$<%= String.format("%,.0f", offer.getSalary()) %>
+                                            <span class="recruiter-badge recruiter-badge-salary">
+                                                $<%= String.format("%,.0f", offer.getSalary()) %> / yr
                                             </span>
                                             <% } %>
-                                                <span style="display: inline-flex; align-items: center; gap: 0.4rem;">
-                                                    <span
-                                                        style="width: 6px; height: 6px; background: #cbd5e1; border-radius: 50%;"></span>
-                                                    <span style="color: #64748b; font-size: 0.85rem;">
-                                                        <%= offer.getRequiredSkills() %>
-                                                    </span>
+                                                <span class="recruiter-badge recruiter-badge-skill">
+                                                    <%= offer.getRequiredSkills() %>
                                                 </span>
                                     </div>
 
-                                    <p class="job-description"
-                                        style="color: #475569; margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.6;">
-                                        <%= offer.getDescription() !=null && offer.getDescription().length()> 120
-                                            ? offer.getDescription().substring(0, 120) + "..."
+                                    <p class="recruiter-description">
+                                        <%= offer.getDescription() !=null && offer.getDescription().length()> 140
+                                            ? offer.getDescription().substring(0, 140) + "..."
                                             : offer.getDescription() %>
                                     </p>
 
-                                    <div style="margin-top: auto;">
+                                    <div class="recruiter-card-footer">
+                                        <div style="font-size: 0.85rem; color: #64748b; font-weight: 500;">
+                                            <span
+                                                style="display: inline-block; width: 8px; height: 8px; background: #22c55e; border-radius: 50%; margin-right: 6px;"></span>
+                                            Active
+                                        </div>
                                         <a href="${pageContext.request.contextPath}/company/applications?jobOfferId=<%= offer.getId() %>"
-                                            class="btn btn-secondary btn-block"
-                                            style="justify-content: center; border-radius: 12px; font-weight: 600; padding: 0.8rem;">
-                                            View Applications
+                                            style="color: #2563eb; font-weight: 600; font-size: 0.9rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                            View Applications →
                                         </a>
                                     </div>
                                 </div>
                                 <% } } else { %>
                                     <div
                                         style="grid-column: 1 / -1; text-align: center; padding: 6rem 2rem; background: white; border-radius: 20px; border: 2px dashed #e2e8f0;">
-                                        <span
-                                            style="font-size: 3.5rem; display: block; margin-bottom: 1.5rem; opacity: 0.8;">📝</span>
+                                        <div
+                                            style="width: 80px; height: 80px; background: #f8fafc; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem;">
+                                            📝
+                                        </div>
                                         <h3 style="margin-bottom: 0.75rem; color: #1e293b; font-size: 1.5rem;">No active
                                             job listings</h3>
                                         <p
@@ -90,7 +105,7 @@
                                             Post your first job offer to reach thousands of qualified candidates.
                                         </p>
                                         <a href="${pageContext.request.contextPath}/company/create-job"
-                                            class="btn btn-primary">Create Job Offer</a>
+                                            class="btn-recruit-primary">Create Job Offer</a>
                                     </div>
                                     <% } %>
                     </div>

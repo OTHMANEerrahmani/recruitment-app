@@ -21,12 +21,20 @@ public class User {
     @Column(nullable = false)
     protected Role role;
 
-    @Column(nullable = false)
-    protected boolean isActive = true;
-
     public enum Role {
         CANDIDATE, COMPANY, ADMIN
     }
+
+    public enum Status {
+        PENDING, ACTIVE, REJECTED
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    protected Status status = Status.PENDING;
+
+    @Column(nullable = false)
+    protected boolean isActive;
 
     public User() {
     }
@@ -36,7 +44,15 @@ public class User {
     }
 
     public void setActive(boolean active) {
-        isActive = active;
+        this.isActive = active;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public Long getId() {
