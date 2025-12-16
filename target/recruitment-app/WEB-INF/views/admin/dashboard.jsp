@@ -67,175 +67,216 @@
                                 </div>
                                 <% session.removeAttribute("message"); session.removeAttribute("messageType"); } %>
 
-                                    <!-- User Management Card -->
-                                    <div class="admin-card">
-                                        <div class="admin-card-header">
-                                            <h2 class="admin-title">User Management</h2>
-                                            <div class="header-actions">
-                                                <!-- Future: <button class="btn btn-primary btn-sm">Add User</button> -->
+                                    <% @SuppressWarnings("unchecked") List<User> users = (List<User>)
+                                            request.getAttribute("users");
+                                            int totalUsers = 0;
+                                            int totalCandidates = 0;
+                                            int totalCompanies = 0;
+
+                                            if (users != null) {
+                                            totalUsers = users.size();
+                                            for (User u : users) {
+                                            if (u.getRole() == User.Role.CANDIDATE) {
+                                            totalCandidates++;
+                                            } else if (u.getRole() == User.Role.COMPANY) {
+                                            totalCompanies++;
+                                            }
+                                            }
+                                            }
+                                            %>
+
+                                            <!-- Key Metrics (Compact Row) -->
+                                            <div class="admin-stats-grid">
+                                                <div class="admin-stat-card">
+                                                    <div class="admin-stat-info">
+                                                        <div class="admin-stat-label">Total Users</div>
+                                                        <div class="admin-stat-value">
+                                                            <%= totalUsers %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="admin-stat-icon">
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                            <circle cx="9" cy="7" r="4"></circle>
+                                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                                        </svg>
+                                                    </div>
+                                                </div>
+
+                                                <div class="admin-stat-card">
+                                                    <div class="admin-stat-info">
+                                                        <div class="admin-stat-label">Candidates</div>
+                                                        <div class="admin-stat-value">
+                                                            <%= totalCandidates %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="admin-stat-icon"
+                                                        style="color: #7c3aed; background: #f5f3ff;">
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                                            <circle cx="12" cy="7" r="4"></circle>
+                                                        </svg>
+                                                    </div>
+                                                </div>
+
+                                                <div class="admin-stat-card">
+                                                    <div class="admin-stat-info">
+                                                        <div class="admin-stat-label">Companies</div>
+                                                        <div class="admin-stat-value">
+                                                            <%= totalCompanies %>
+                                                        </div>
+                                                    </div>
+                                                    <div class="admin-stat-icon"
+                                                        style="color: #0284c7; background: #f0f9ff;">
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2">
+                                                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2">
+                                                            </rect>
+                                                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                                        </svg>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="admin-table-container">
-                                            <table class="admin-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th width="80">ID</th>
-                                                        <th>User Details</th>
-                                                        <th>Role</th>
-                                                        <th>Status</th>
-                                                        <th style="text-align: right;">Actions</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <% @SuppressWarnings("unchecked") List<User> users = (List<User>)
-                                                            request.getAttribute("users");
-                                                            if (users != null && !users.isEmpty()) {
-                                                            for (User u : users) {
-                                                            %>
-                                                            <tr>
-                                                                <td style="color: #64748b; font-family: monospace;">#<%=
-                                                                        u.getId() %>
-                                                                </td>
-                                                                <td>
-                                                                    <div
-                                                                        style="display: flex; align-items: center; gap: 0.8rem;">
-                                                                        <div
-                                                                            style="width: 32px; height: 32px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #3b82f6; font-weight: 700; font-size: 0.85rem;">
-                                                                            <%= u.getEmail().substring(0,
-                                                                                1).toUpperCase() %>
-                                                                        </div>
-                                                                        <span style="font-weight: 500;">
-                                                                            <%= u.getEmail() %>
-                                                                        </span>
-                                                                    </div>
-                                                                </td>
-                                                                <td>
-                                                                    <span class="badge badge-role-<%= u.getRole() %>">
-                                                                        <%= u.getRole() %>
-                                                                    </span>
-                                                                </td>
-                                                                <td>
-                                                                    <% if (u.isActive()) { %>
-                                                                        <span
-                                                                            class="badge badge-status-active">Active</span>
-                                                                        <% } else { %>
-                                                                            <span
-                                                                                class="badge badge-status-inactive">Inactive</span>
-                                                                            <% } %>
-                                                                </td>
-                                                                <td style="text-align: right;">
-                                                                    <div class="actions-cell">
-                                                                        <% if (u.getRole()==User.Role.COMPANY) { %>
-                                                                            <a href="${pageContext.request.contextPath}/admin/company-offers?companyId=<%= u.getId() %>"
-                                                                                class="action-btn"
-                                                                                data-tooltip="View Offers"
-                                                                                style="color: #0284c7;">
-                                                                                <svg width="16" height="16"
-                                                                                    viewBox="0 0 24 24" fill="none"
-                                                                                    stroke="currentColor"
-                                                                                    stroke-width="2"
-                                                                                    stroke-linecap="round"
-                                                                                    stroke-linejoin="round">
-                                                                                    <path
-                                                                                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z">
-                                                                                    </path>
-                                                                                    <polyline points="14 2 14 8 20 8">
-                                                                                    </polyline>
-                                                                                    <line x1="16" y1="13" x2="8"
-                                                                                        y2="13"></line>
-                                                                                    <line x1="16" y1="17" x2="8"
-                                                                                        y2="17"></line>
-                                                                                    <polyline points="10 9 9 9 8 9">
-                                                                                    </polyline>
-                                                                                </svg>
-                                                                            </a>
-                                                                            <% } %>
+                                            <!-- Tabs Navigation -->
+                                            <div class="admin-tabs">
+                                                <button class="admin-tab active" onclick="switchTab('all')">All
+                                                    Users</button>
+                                                <button class="admin-tab"
+                                                    onclick="switchTab('candidates')">Candidates</button>
+                                                <button class="admin-tab"
+                                                    onclick="switchTab('companies')">Companies</button>
+                                            </div>
 
-                                                                                <% if (u.getRole()==User.Role.CANDIDATE)
-                                                                                    { %>
-                                                                                    <a href="${pageContext.request.contextPath}/admin/candidate-profile?candidateId=<%= u.getId() %>"
-                                                                                        class="action-btn"
-                                                                                        data-tooltip="View Profile"
-                                                                                        style="color: #7c3aed;">
-                                                                                        <svg width="16" height="16"
-                                                                                            viewBox="0 0 24 24"
-                                                                                            fill="none"
-                                                                                            stroke="currentColor"
-                                                                                            stroke-width="2"
-                                                                                            stroke-linecap="round"
-                                                                                            stroke-linejoin="round">
-                                                                                            <path
-                                                                                                d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2">
-                                                                                            </path>
-                                                                                            <circle cx="12" cy="7"
-                                                                                                r="4"></circle>
-                                                                                        </svg>
-                                                                                    </a>
-                                                                                    <% } %>
-
-                                                                                        <a href="${pageContext.request.contextPath}/admin/edit-user?id=<%= u.getId() %>"
-                                                                                            class="action-btn btn-edit"
-                                                                                            data-tooltip="Edit User">
-                                                                                            <svg width="16" height="16"
-                                                                                                viewBox="0 0 24 24"
-                                                                                                fill="none"
-                                                                                                stroke="currentColor"
-                                                                                                stroke-width="2"
-                                                                                                stroke-linecap="round"
-                                                                                                stroke-linejoin="round">
-                                                                                                <path
-                                                                                                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7">
-                                                                                                </path>
-                                                                                                <path
-                                                                                                    d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z">
-                                                                                                </path>
-                                                                                            </svg>
-                                                                                        </a>
-
-                                                                                        <button type="button"
-                                                                                            onclick="showDeleteModal(<%= u.getId() %>, '<%= u.getEmail() %>')"
-                                                                                            class="action-btn btn-delete"
-                                                                                            data-tooltip="Delete User">
-                                                                                            <svg width="16" height="16"
-                                                                                                viewBox="0 0 24 24"
-                                                                                                fill="none"
-                                                                                                stroke="currentColor"
-                                                                                                stroke-width="2"
-                                                                                                stroke-linecap="round"
-                                                                                                stroke-linejoin="round">
-                                                                                                <polyline
-                                                                                                    points="3 6 5 6 21 6">
-                                                                                                </polyline>
-                                                                                                <path
-                                                                                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                                                                                </path>
-                                                                                                <line x1="10" y1="11"
-                                                                                                    x2="10" y2="17">
-                                                                                                </line>
-                                                                                                <line x1="14" y1="11"
-                                                                                                    x2="14" y2="17">
-                                                                                                </line>
-                                                                                            </svg>
-                                                                                        </button>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <% } } else { %>
+                                            <!-- All Users Section -->
+                                            <div id="section-all" class="admin-section active">
+                                                <div class="admin-card">
+                                                    <div class="admin-card-header">
+                                                        <div>
+                                                            <h2 class="admin-title">All Users</h2>
+                                                            <p
+                                                                style="margin: 0.2rem 0 0; font-size: 0.85rem; color: #64748b;">
+                                                                Complete user registry</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="admin-table-container">
+                                                        <table class="admin-table">
+                                                            <thead>
                                                                 <tr>
-                                                                    <td colspan="5"
-                                                                        style="text-align: center; padding: 4rem; color: #64748b;">
-                                                                        <div
-                                                                            style="font-size: 3rem; margin-bottom: 1rem;">
-                                                                            🤔</div>
-                                                                        <p>No users found in the system yet.</p>
-                                                                    </td>
+                                                                    <th width="80">ID</th>
+                                                                    <th>User Details</th>
+                                                                    <th>Role</th>
+                                                                    <th>Status</th>
+                                                                    <th style="text-align: right;">Actions</th>
                                                                 </tr>
-                                                                <% } %>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                                                            </thead>
+                                                            <tbody>
+                                                                <% if (users !=null && !users.isEmpty()) { for (User u :
+                                                                    users) { %>
+                                                                    <%@ include
+                                                                        file="/WEB-INF/views/admin/fragments/user_row.jspf"
+                                                                        %>
+                                                                        <% } } else { %>
+                                                                            <tr>
+                                                                                <td colspan="5"
+                                                                                    style="text-align: center; padding: 2rem;">
+                                                                                    No users found.</td>
+                                                                            </tr>
+                                                                            <% } %>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Candidates Section -->
+                                            <div id="section-candidates" class="admin-section" style="display: none;">
+                                                <div class="admin-card">
+                                                    <div class="admin-card-header">
+                                                        <div>
+                                                            <h2 class="admin-title">Candidate Management</h2>
+                                                            <p
+                                                                style="margin: 0.2rem 0 0; font-size: 0.85rem; color: #64748b;">
+                                                                View and manage job seekers</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="admin-table-container">
+                                                        <table class="admin-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th width="80">ID</th>
+                                                                    <th>User Details</th>
+                                                                    <th>Status</th>
+                                                                    <th style="text-align: right;">Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <% if (users !=null) { for (User u : users) { if
+                                                                    (u.getRole()==User.Role.CANDIDATE) { %>
+                                                                    <%@ include
+                                                                        file="/WEB-INF/views/admin/fragments/user_row.jspf"
+                                                                        %>
+                                                                        <% } } } %>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Companies Section -->
+                                            <div id="section-companies" class="admin-section" style="display: none;">
+                                                <div class="admin-card">
+                                                    <div class="admin-card-header">
+                                                        <div>
+                                                            <h2 class="admin-title">Company Management</h2>
+                                                            <p
+                                                                style="margin: 0.2rem 0 0; font-size: 0.85rem; color: #64748b;">
+                                                                Manage recruiters and offers</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="admin-table-container">
+                                                        <table class="admin-table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th width="80">ID</th>
+                                                                    <th>Company Details</th>
+                                                                    <th>Status</th>
+                                                                    <th style="text-align: right;">Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <% if (users !=null) { for (User u : users) { if
+                                                                    (u.getRole()==User.Role.COMPANY) { %>
+                                                                    <%@ include
+                                                                        file="/WEB-INF/views/admin/fragments/user_row.jspf"
+                                                                        %>
+                                                                        <% } } } %>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <script>
+                                                function switchTab(tabName) {
+                                                    // Hide all sections
+                                                    document.getElementById('section-all').style.display = 'none';
+                                                    document.getElementById('section-candidates').style.display = 'none';
+                                                    document.getElementById('section-companies').style.display = 'none';
+
+                                                    // Remove active class from tabs
+                                                    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+
+                                                    // Show selected section
+                                                    document.getElementById('section-' + tabName).style.display = 'block';
+
+                                                    // Add active class to clicked tab
+                                                    event.currentTarget.classList.add('active');
+                                                }
+                                            </script>
                 </main>
 
                 <!-- Professional Delete Modal -->

@@ -1,0 +1,46 @@
+<%@ page import="com.recruitment.entity.User" %>
+<tr>
+    <td style="color: #64748b; font-family: monospace; font-size: 0.9rem;">#<%= u.getId() %></td>
+    <td>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 36px; height: 36px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748b; font-weight: 700; font-size: 0.9rem;">
+                <%= u.getEmail().substring(0, 1).toUpperCase() %>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 600; color: #1e293b;"><%= u.getEmail() %></span>
+            </div>
+        </div>
+    </td>
+    <%-- Conditionally show Role column only if we are in 'All' view or if explicitly needed. Since we are reusing this, we can just show it or hide it via CSS if we wanted, but let's keep it simple and show it. --%>
+    <td><span class="badge badge-role-<%= u.getRole() %>"><%= u.getRole() %></span></td>
+    <td>
+        <% if (u.isActive()) { %>
+            <span class="badge badge-status-active">Active</span>
+        <% } else { %>
+            <span class="badge badge-status-inactive">Inactive</span>
+        <% } %>
+    </td>
+    <td style="text-align: right;">
+        <div class="actions-cell">
+            <% if (u.getRole() == User.Role.COMPANY) { %>
+                <a href="${pageContext.request.contextPath}/admin/company-offers?companyId=<%= u.getId() %>" class="action-btn" data-tooltip="View Offers" style="color: #0284c7;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </a>
+            <% } %>
+
+            <% if (u.getRole() == User.Role.CANDIDATE) { %>
+                <a href="${pageContext.request.contextPath}/admin/candidate-profile?candidateId=<%= u.getId() %>" class="action-btn" data-tooltip="View Profile" style="color: #7c3aed;">
+                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </a>
+            <% } %>
+
+            <a href="${pageContext.request.contextPath}/admin/edit-user?id=<%= u.getId() %>" class="action-btn btn-edit" data-tooltip="Edit User">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </a>
+
+            <button type="button" onclick="showDeleteModal(<%= u.getId() %>, '<%= u.getEmail() %>')" class="action-btn btn-delete" data-tooltip="Delete User">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+            </button>
+        </div>
+    </td>
+</tr>
