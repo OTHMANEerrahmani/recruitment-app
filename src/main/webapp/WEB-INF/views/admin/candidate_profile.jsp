@@ -116,7 +116,7 @@
                                                                 <%= app.getJobOffer().getTitle() %>
                                                             </td>
                                                             <td style="color: #475569;">
-                                                                <%= app.getJobOffer().getCompany().getName() %>
+                                                                <%= app.getJobOffer().getCompany().getCompanyName() %>
                                                             </td>
                                                             <td style="color: #64748b;">
                                                                 <!-- Simple date formatting if available, else standard toString -->

@@ -29,6 +29,17 @@ public class JobOffer {
     @OneToMany(mappedBy = "jobOffer", cascade = CascadeType.ALL)
     private List<Application> applications;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public JobOffer() {
     }
 
